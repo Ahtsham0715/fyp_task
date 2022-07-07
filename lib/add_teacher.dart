@@ -28,11 +28,12 @@ class _AddTeacherState extends State<AddTeacher> {
   String? downloadImgUrl = '';
   final TextEditingController _name = TextEditingController();
   // final TextEditingController _designation = TextEditingController();
-  final TextEditingController _department = TextEditingController();
+  final TextEditingController _contactno = TextEditingController();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
   final TextEditingController _confirmpass = TextEditingController();
   String? _designation;
+  String? _department;
   bool passwordVisible = true;
   bool confirmPasswordVisible = true;
   bool isauthenticating = false;
@@ -42,18 +43,34 @@ class _AddTeacherState extends State<AddTeacher> {
   String? teacherId;
   List<String> tDesignation = [
     "Instructor",
-    "Lecturer",
     "Visiting Lecturer",
-    "Professor",
+    "Lecturer",
     "Assistant Professor",
-    "Associate Professor,"
+    "Associate Professor",
+    "Professor",
+  ];
+  List<String> departments = [
+    'Computer Science and IT',
+    'Biological Science',
+    'Chemistry',
+    'Physics',
+    'Business Administration',
+    'Economics',
+    'Education',
+    'English',
+    'Mathematics',
+    'Psychology',
+    'Social Work',
+    'Sociology',
+    'Sports Sciences',
+    'Urdu'
   ];
   @override
   void initState() {
     super.initState();
     if (editProfileArgument[0]['pageTitle'] == "Edit Teacher's Profile") {
       _name.text = editProfileArgument[0]['teacher_name'];
-      _department.text = editProfileArgument[0]['department'];
+      _department = editProfileArgument[0]['department'];
       _designation = editProfileArgument[0]['designation'];
     }
 
@@ -111,7 +128,8 @@ class _AddTeacherState extends State<AddTeacher> {
             'status': 'Pending',
             'teacher_name': _name.text.trim(),
             'designation': '$_designation',
-            'department': _department.text.trim(),
+            'department': _department,
+            'contact_no': _contactno.text.trim(),
             'email': _email.text.trim(),
             'imgUrl': downloadImgUrl,
           }, SetOptions(merge: true))
@@ -119,7 +137,8 @@ class _AddTeacherState extends State<AddTeacher> {
             // 'isTeacher': true,
             'teacher_name': _name.text.trim(),
             'designation': '$_designation',
-            'department': _department.text.trim(),
+            'department': _department,
+            'contact_no': _contactno.text.trim(),
             'imgUrl': (isImageSelected)
                 ? downloadImgUrl
                 : editProfileArgument[0]['imgUrl'],
@@ -138,7 +157,7 @@ class _AddTeacherState extends State<AddTeacher> {
             });
       editProfileArgument[0]['pageTitle'] == "Edit Teacher's Profile"
           ? null
-          : _department.clear();
+          : _department = null;
       _email.clear();
       _password.clear();
       _confirmpass.clear();
@@ -341,26 +360,35 @@ class _AddTeacherState extends State<AddTeacher> {
                 });
               }, context),
               customSizedBox(),
+              customDropDownFormField("Department", _department, departments,
+                  (value) {
+                setState(() {
+                  _department = value;
+                });
+              }, context),
+              customSizedBox(),
               customTextField(
-                "Department",
+                "Contact No",
                 false,
                 null,
-                _department,
+                _contactno,
                 (value) {
                   if (value!.isEmpty) {
-                    return "Please Enter Teacher's Department";
+                    return "Please Enter Teacher's contact no";
                   }
-                  if (!RegExp(r"^[a-z+A-Z]+").hasMatch(value)) {
-                    return "Please Enter Valid Department";
+                  if (!RegExp(
+                          r"^((\+92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$")
+                      .hasMatch(value)) {
+                    return "Please Enter Valid Contact No";
                   }
                 },
                 (value) {
-                  _department.text = value!;
+                  _contactno.text = value!;
                 },
                 responsiveHW(context, wd: 100),
                 responsiveHW(context, ht: 100),
                 InputBorder.none,
-                pIcon: FontAwesomeIcons.building,
+                pIcon: FontAwesomeIcons.phone,
               ),
               customSizedBox(),
               editProfileArgument[0]["pageTitle"].toString() == "Add Teacher"
