@@ -7,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:fyp_task/custom%20widgets/custom_toast.dart';
+import 'package:fyp_task/custom_formfield.dart';
 import 'package:fyp_task/user profile/profile_widget.dart';
 import 'package:fyp_task/user profile/teacher_profile.dart';
 import 'package:get/get.dart';
@@ -24,8 +25,8 @@ class _edit_profileState extends State<edit_profile> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _fullname = TextEditingController();
   final TextEditingController _about = TextEditingController();
-  final TextEditingController _designation = TextEditingController();
-  final TextEditingController _department = TextEditingController();
+  final TextEditingController designation = TextEditingController();
+  final TextEditingController department = TextEditingController();
   String path = '';
   bool IsSelected = false;
   bool isworking = false;
@@ -33,6 +34,32 @@ class _edit_profileState extends State<edit_profile> {
   var imagePath = '';
   var currentuserid;
   var args = Get.arguments;
+  String? _designation;
+  String? _department;
+  List<String> tDesignation = [
+    "Instructor",
+    "Visiting Lecturer",
+    "Lecturer",
+    "Assistant Professor",
+    "Associate Professor",
+    "Professor",
+  ];
+  List<String> departments = [
+    'Computer Science and IT',
+    'Biological Science',
+    'Chemistry',
+    'Physics',
+    'Business Administration',
+    'Economics',
+    'Education',
+    'English',
+    'Mathematics',
+    'Psychology',
+    'Social Work',
+    'Sociology',
+    'Sports Sciences',
+    'Urdu'
+  ];
 
   @override
   void initState() {
@@ -43,8 +70,8 @@ class _edit_profileState extends State<edit_profile> {
     }
     imagePath = args["imgUrl"].toString();
     _fullname.text = args['teacher_name'];
-    _designation.text = args['designation'];
-    _department.text = args['department'];
+    _designation = args['designation'];
+    _department = args['department'];
   }
 
   Future<void> uploadFile(String filePath) async {
@@ -104,6 +131,42 @@ class _edit_profileState extends State<edit_profile> {
     );
   }
 
+  Widget customdropdownformfield(fieldTitle, dropDownValue,
+      List<String> listOfItems, onChangedFunc, ctx, icon) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 35, right: 35, top: 15, bottom: 15),
+      child: DropdownButtonFormField(
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          decoration: InputDecoration(
+            prefixIcon: Icon(icon),
+            labelText: fieldTitle,
+            labelStyle: const TextStyle(
+              color: Colors.teal,
+            ),
+            filled: true,
+            enabled: true,
+            fillColor: Colors.transparent,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14.0),
+              borderSide: const BorderSide(color: Colors.teal),
+            ),
+          ),
+          validator: (value) => value == null ? 'Required*' : null,
+          icon: const Icon(
+            Icons.arrow_drop_down,
+            color: Colors.grey,
+          ),
+          // hint: Text(
+          //   'Select $fieldTitle',
+          // ),
+          value: dropDownValue,
+          items: listOfItems.map((String value) {
+            return DropdownMenuItem<String>(value: value, child: Text(value));
+          }).toList(),
+          onChanged: onChangedFunc),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -131,8 +194,8 @@ class _edit_profileState extends State<edit_profile> {
                           .set({
                         // 'isteacher': false,
                         'teacher_name': _fullname.text.trim(),
-                        'designation': _designation.text.trim(),
-                        'department': _department.text.trim(),
+                        'designation': _designation,
+                        'department': _department,
                         'imgUrl': imagePath.toString(),
                       }, SetOptions(merge: true)).then((value) {
                         Navigator.pop(context);
@@ -148,8 +211,8 @@ class _edit_profileState extends State<edit_profile> {
                       .set({
                     // 'isteacher': false,
                     'teacher_name': _fullname.text.trim(),
-                    'designation': _designation.text.trim(),
-                    'department': _department.text.trim(),
+                    'designation': _designation,
+                    'department': _department,
                   }, SetOptions(merge: true)).then((value) {
                     Navigator.pop(context);
                     customtoast('Data Submitted');
@@ -195,10 +258,22 @@ class _edit_profileState extends State<edit_profile> {
                   Icons.edit,
                   false,
                 ),
-                customtextformfield('Designation', _designation,
-                    Icons.workspace_premium_outlined, false),
-                customtextformfield('Department', _department,
-                    FontAwesomeIcons.building, false),
+                customdropdownformfield(
+                    "Designation", _designation, tDesignation, (value) {
+                  setState(() {
+                    _designation = value;
+                  });
+                }, context, Icons.workspace_premium_outlined),
+                customdropdownformfield("Department", _department, departments,
+                    (value) {
+                  setState(() {
+                    _department = value;
+                  });
+                }, context, FontAwesomeIcons.building),
+                // customtextformfield('Designation', designation,
+                //     Icons.workspace_premium_outlined, false),
+                // customtextformfield(
+                //     'Department', department, FontAwesomeIcons.building, false),
                 // SizedBox(
                 //     height: maxlength * 30.0,
                 //     child: customtextformfield('About', _about,FontAwesomeIcons.circleInfo,false)),

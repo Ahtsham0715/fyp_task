@@ -489,7 +489,7 @@ class _SubjectsPageState extends State<SubjectsPage> {
                       currentAccountPicture: GestureDetector(
                         onTap: () {},
                         child: CircleAvatar(
-                          backgroundColor: Colors.teal,
+                          // backgroundColor: Colors.teal,
                           foregroundImage:
                               CachedNetworkImageProvider(_photourl.value),
                           child: const Icon(

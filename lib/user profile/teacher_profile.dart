@@ -293,6 +293,20 @@ class _teacherprofileState extends State<teacherprofile> {
                                     color: Colors.white,
                                   ),
                                 ),
+                                const TextSpan(
+                                  text: "Contact No:  ",
+                                  style: TextStyle(
+                                    fontSize: 18.0,
+                                    color: Colors.teal,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: "${teacherdata['contact_no']}\n",
+                                  style: const TextStyle(
+                                    fontSize: 18.0,
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ])),
                         ),
                         SizedBox(
@@ -311,8 +325,8 @@ class _teacherprofileState extends State<teacherprofile> {
                 Positioned(
                   // top: MediaQuery.of(context).size.height * 0.14,
                   // left: MediaQuery.of(context).size.height * 0.16,
-                  height:MediaQuery.of(context).size.height * 0.4,
-                  width: MediaQuery.of(context).size.width* 1.0,
+                  height: MediaQuery.of(context).size.height * 0.4,
+                  width: MediaQuery.of(context).size.width * 1.0,
                   child: ProfileWidget(
                     imagePath: '${teacherdata["imgUrl"]}',
                     onClicked: () async {
