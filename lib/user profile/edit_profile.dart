@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:fyp_task/custom%20widgets/custom_toast.dart';
 import 'package:fyp_task/custom_formfield.dart';
+import 'package:fyp_task/departments_getter.dart';
 import 'package:fyp_task/user profile/profile_widget.dart';
 import 'package:fyp_task/user profile/teacher_profile.dart';
 import 'package:get/get.dart';
@@ -30,6 +31,7 @@ class _edit_profileState extends State<edit_profile> {
   String path = '';
   bool IsSelected = false;
   bool isworking = false;
+  bool isloading = true;
   final maxlength = 5;
   var imagePath = '';
   var currentuserid;
@@ -72,6 +74,12 @@ class _edit_profileState extends State<edit_profile> {
     _fullname.text = args['teacher_name'];
     _designation = args['designation'];
     _department = args['department'];
+    getdepartments().then((value) {
+      setState(() {
+        isloading = false;
+        departments = value as List<String>;
+      });
+    });
   }
 
   Future<void> uploadFile(String filePath) async {
@@ -226,60 +234,66 @@ class _edit_profileState extends State<edit_profile> {
             )
           ],
         ),
-        body: ListView(children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.07,
-          ),
-          ProfileWidget(
-              imagePath: imagePath,
-              onClicked: () {
-                filepicker(filetype: FileType.image).then((selectedpath) {
-                  if (selectedpath.toString().isNotEmpty) {
-                    setState(() {
-                      imagePath = selectedpath;
-                      // imagePath = selectedpath;
-                      IsSelected = true;
-                    });
-                  }
-                });
-              },
-              icon: Icons.camera_enhance),
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.03,
-          ),
-          Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                customtextformfield(
-                  'Full Name',
-                  _fullname,
-                  Icons.edit,
-                  false,
+        body: isloading
+            ? const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.teal,
                 ),
-                customdropdownformfield(
-                    "Designation", _designation, tDesignation, (value) {
-                  setState(() {
-                    _designation = value;
-                  });
-                }, context, Icons.workspace_premium_outlined),
-                customdropdownformfield("Department", _department, departments,
-                    (value) {
-                  setState(() {
-                    _department = value;
-                  });
-                }, context, FontAwesomeIcons.building),
-                // customtextformfield('Designation', designation,
-                //     Icons.workspace_premium_outlined, false),
-                // customtextformfield(
-                //     'Department', department, FontAwesomeIcons.building, false),
-                // SizedBox(
-                //     height: maxlength * 30.0,
-                //     child: customtextformfield('About', _about,FontAwesomeIcons.circleInfo,false)),
-              ],
-            ),
-          ),
-        ]));
+              )
+            : ListView(children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.07,
+                ),
+                ProfileWidget(
+                    imagePath: imagePath,
+                    onClicked: () {
+                      filepicker(filetype: FileType.image).then((selectedpath) {
+                        if (selectedpath.toString().isNotEmpty) {
+                          setState(() {
+                            imagePath = selectedpath;
+                            // imagePath = selectedpath;
+                            IsSelected = true;
+                          });
+                        }
+                      });
+                    },
+                    icon: Icons.camera_enhance),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.03,
+                ),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      customtextformfield(
+                        'Full Name',
+                        _fullname,
+                        Icons.edit,
+                        false,
+                      ),
+                      customdropdownformfield(
+                          "Designation", _designation, tDesignation, (value) {
+                        setState(() {
+                          _designation = value;
+                        });
+                      }, context, Icons.workspace_premium_outlined),
+                      customdropdownformfield(
+                          "Department", _department, departments, (value) {
+                        setState(() {
+                          _department = value;
+                        });
+                      }, context, FontAwesomeIcons.building),
+                      // customtextformfield('Designation', designation,
+                      //     Icons.workspace_premium_outlined, false),
+                      // customtextformfield(
+                      //     'Department', department, FontAwesomeIcons.building, false),
+                      // SizedBox(
+                      //     height: maxlength * 30.0,
+                      //     child: customtextformfield('About', _about,FontAwesomeIcons.circleInfo,false)),
+                    ],
+                  ),
+                ),
+              ]));
   }
 }
