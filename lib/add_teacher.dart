@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:fyp_task/custom%20widgets/custom_widgets.dart';
 import 'package:fyp_task/custom_formfield.dart';
+import 'package:fyp_task/departments_getter.dart';
 import 'package:fyp_task/login_page.dart';
 import 'package:fyp_task/utils.dart';
 import 'package:get/get.dart';
@@ -37,7 +38,7 @@ class _AddTeacherState extends State<AddTeacher> {
   bool confirmPasswordVisible = true;
   bool isauthenticating = false;
   bool isImageSelected = false;
-
+  bool isloading = true;
   var editProfileArgument = Get.arguments;
   String? teacherId;
   List<String> tDesignation = [
@@ -49,20 +50,20 @@ class _AddTeacherState extends State<AddTeacher> {
     "Professor",
   ];
   List<String> departments = [
-    'Computer Science and IT',
-    'Biological Science',
-    'Chemistry',
-    'Physics',
-    'Business Administration',
-    'Economics',
-    'Education',
-    'English',
-    'Mathematics',
-    'Psychology',
-    'Social Work',
-    'Sociology',
-    'Sports Sciences',
-    'Urdu'
+    // 'Computer Science and IT',
+    // 'Biological Science',
+    // 'Chemistry',
+    // 'Physics',
+    // 'Business Administration',
+    // 'Economics',
+    // 'Education',
+    // 'English',
+    // 'Mathematics',
+    // 'Psychology',
+    // 'Social Work',
+    // 'Sociology',
+    // 'Sports Sciences',
+    // 'Urdu'
   ];
   @override
   void initState() {
@@ -72,7 +73,12 @@ class _AddTeacherState extends State<AddTeacher> {
       _department = editProfileArgument[0]['department'];
       _designation = editProfileArgument[0]['designation'];
     }
-
+    getdepartments().then((value) {
+      setState(() {
+        isloading = false;
+        departments = value as List<String>;
+      });
+    });
     teacherId = editProfileArgument[0]['teacherId'];
   }
 
@@ -235,296 +241,309 @@ class _AddTeacherState extends State<AddTeacher> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Form(
-        key: _formKey,
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              leading: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back,
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-              automaticallyImplyLeading: false,
-              backgroundColor: Colors.teal,
-              centerTitle: true,
-              pinned: true,
-              snap: true,
-              floating: true,
-              elevation: 0.0,
-              title: customText(
-                txt: editProfileArgument[0]["pageTitle"].toString(),
-                clr: Colors.white,
-                fsize: 20.0,
-                fweight: FontWeight.w500,
-              ),
-              expandedHeight: responsiveHW(context, ht: 8),
-            ),
-            SliverToBoxAdapter(
-              child: Container(
-                width: responsiveHW(context, wd: 100),
-                height: responsiveHW(context, ht: 23),
-                decoration: const BoxDecoration(
-                  color: Colors.teal,
-                  borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(20.0),
-                      bottomRight: Radius.circular(20.0)),
-                ),
-                child: Column(
-                  children: [
-                    customSizedBox(height: 1),
-                    GestureDetector(
-                      onTap: () {
-                        filepicker(filetype: FileType.image)
-                            .then((selectedpath) {
-                          if (selectedpath.toString().isNotEmpty) {
-                            setState(() {
-                              imgPath = selectedpath;
-                              isImageSelected = true;
-                            });
-                          }
-                        });
+      body: isloading
+          ? const Center(
+              child: CircularProgressIndicator(color: Colors.teal),
+            )
+          : Form(
+              key: _formKey,
+              child: CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    leading: IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
                       },
-                      child: isImageSelected
-                          ? CircleAvatar(
-                              radius: 50.0,
-                              foregroundImage: FileImage(File(imgPath)),
-                              child: const Icon(
-                                Icons.person,
-                                size: 80.0,
-                                color: Colors.white,
-                              ),
-                            )
-                          : CircleAvatar(
-                              radius: 50.0,
-                              foregroundImage: NetworkImage(
-                                  editProfileArgument[0]['imgUrl'].toString()),
-                              backgroundColor: Colors.black26,
-                              child: const Icon(
-                                Icons.person,
-                                size: 80.0,
-                                color: Colors.white,
-                              ),
-                            ),
                     ),
-                    customSizedBox(height: 1),
-                    Text(
-                      "Select Profile Image",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: responsiveHW(context, ht: 2)),
+                    automaticallyImplyLeading: false,
+                    backgroundColor: Colors.teal,
+                    centerTitle: true,
+                    pinned: true,
+                    snap: true,
+                    floating: true,
+                    elevation: 0.0,
+                    title: customText(
+                      txt: editProfileArgument[0]["pageTitle"].toString(),
+                      clr: Colors.white,
+                      fsize: 20.0,
+                      fweight: FontWeight.w500,
                     ),
-                  ],
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                  padding: EdgeInsets.only(
-                bottom: responsiveHW(context, ht: 3)!.toDouble(),
-              )),
-            ),
-            SliverList(
-                delegate: SliverChildListDelegate([
-              customTextField(
-                "Name",
-                false,
-                null,
-                _name,
-                (value) {
-                  if (value!.isEmpty) {
-                    return "Please Enter Teacher Name ";
-                  }
-                  if (!RegExp(r"^[A-Z+a-z]+").hasMatch(value)) {
-                    return "Please Enter Valid Name";
-                  }
-                },
-                (value) {
-                  _name.text = value!;
-                },
-                responsiveHW(context, wd: 100),
-                responsiveHW(context, ht: 100),
-                InputBorder.none,
-                pIcon: Icons.edit,
-              ),
-              customSizedBox(),
-              customDropDownFormField("Designation", _designation, tDesignation,
-                  (value) {
-                setState(() {
-                  _designation = value;
-                });
-              }, context),
-              customSizedBox(),
-              customDropDownFormField("Department", _department, departments,
-                  (value) {
-                setState(() {
-                  _department = value;
-                });
-              }, context),
-              customSizedBox(),
-              customTextField(
-                "Contact No",
-                false,
-                null,
-                _contactno,
-                (value) {
-                  if (value!.isEmpty) {
-                    return "Please Enter Teacher's contact no";
-                  }
-                  if (!RegExp(
-                          r"^((\+92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$")
-                      .hasMatch(value)) {
-                    return "Please Enter Valid Contact No";
-                  }
-                },
-                (value) {
-                  _contactno.text = value!;
-                },
-                responsiveHW(context, wd: 100),
-                responsiveHW(context, ht: 100),
-                InputBorder.none,
-                pIcon: FontAwesomeIcons.phone,
-              ),
-              customSizedBox(),
-              editProfileArgument[0]["pageTitle"].toString() == "Add Teacher"
-                  ? customTextField(
-                      "Email",
+                    expandedHeight: responsiveHW(context, ht: 8),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Container(
+                      width: responsiveHW(context, wd: 100),
+                      height: responsiveHW(context, ht: 23),
+                      decoration: const BoxDecoration(
+                        color: Colors.teal,
+                        borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(20.0),
+                            bottomRight: Radius.circular(20.0)),
+                      ),
+                      child: Column(
+                        children: [
+                          customSizedBox(height: 1),
+                          GestureDetector(
+                            onTap: () {
+                              filepicker(filetype: FileType.image)
+                                  .then((selectedpath) {
+                                if (selectedpath.toString().isNotEmpty) {
+                                  setState(() {
+                                    imgPath = selectedpath;
+                                    isImageSelected = true;
+                                  });
+                                }
+                              });
+                            },
+                            child: isImageSelected
+                                ? CircleAvatar(
+                                    radius: 50.0,
+                                    foregroundImage: FileImage(File(imgPath)),
+                                    child: const Icon(
+                                      Icons.person,
+                                      size: 80.0,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : CircleAvatar(
+                                    radius: 50.0,
+                                    foregroundImage: NetworkImage(
+                                        editProfileArgument[0]['imgUrl']
+                                            .toString()),
+                                    backgroundColor: Colors.black26,
+                                    child: const Icon(
+                                      Icons.person,
+                                      size: 80.0,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          ),
+                          customSizedBox(height: 1),
+                          Text(
+                            "Select Profile Image",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: responsiveHW(context, ht: 2)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                        padding: EdgeInsets.only(
+                      bottom: responsiveHW(context, ht: 3)!.toDouble(),
+                    )),
+                  ),
+                  SliverList(
+                      delegate: SliverChildListDelegate([
+                    customTextField(
+                      "Name",
                       false,
                       null,
-                      _email,
+                      _name,
                       (value) {
                         if (value!.isEmpty) {
-                          return "Please Enter Your Email";
+                          return "Please Enter Teacher Name ";
+                        }
+                        if (!RegExp(r"^[A-Z+a-z]+").hasMatch(value)) {
+                          return "Please Enter Valid Name";
+                        }
+                      },
+                      (value) {
+                        _name.text = value!;
+                      },
+                      responsiveHW(context, wd: 100),
+                      responsiveHW(context, ht: 100),
+                      InputBorder.none,
+                      pIcon: Icons.edit,
+                    ),
+                    customSizedBox(),
+                    customDropDownFormField(
+                        "Designation", _designation, tDesignation, (value) {
+                      setState(() {
+                        _designation = value;
+                      });
+                    }, context),
+                    customSizedBox(),
+                    customDropDownFormField(
+                        "Department", _department, departments, (value) {
+                      setState(() {
+                        _department = value;
+                      });
+                    }, context),
+                    customSizedBox(),
+                    customTextField(
+                      "Contact No",
+                      false,
+                      null,
+                      _contactno,
+                      (value) {
+                        if (value!.isEmpty) {
+                          return "Please Enter Teacher's contact no";
                         }
                         if (!RegExp(
-                                r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                r"^((\+92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$")
                             .hasMatch(value)) {
-                          return "Please Enter Valid Email Address";
+                          return "Please Enter Valid Contact No";
                         }
                       },
                       (value) {
-                        _email.text = value!;
+                        _contactno.text = value!;
                       },
                       responsiveHW(context, wd: 100),
                       responsiveHW(context, ht: 100),
                       InputBorder.none,
-                      pIcon: Icons.email,
-                    )
-                  : customSizedBox(height: 0),
-              customSizedBox(),
-              editProfileArgument[0]["pageTitle"].toString() == "Add Teacher"
-                  ? customTextField(
-                      "Password",
-                      passwordVisible,
-                      IconButton(
-                        icon: Icon(
-                          //choose the icon on based of passwordVisibility
-                          passwordVisible
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: Colors.grey,
-                        ),
-                        onPressed: _passwordVisibility,
-                      ),
-                      _password,
-                      (value) {
-                        if (value!.isEmpty) {
-                          return "Please enter your password";
-                        }
-                        if (value.length < 8) {
-                          return "Password length must be atleast 8 characters";
-                        }
-                      },
-                      (value) {
-                        _password.text = value!;
-                      },
-                      responsiveHW(context, wd: 100),
-                      responsiveHW(context, ht: 100),
-                      InputBorder.none,
-                      pIcon: Icons.lock,
-                    )
-                  : customSizedBox(height: 0),
-              editProfileArgument[0]["pageTitle"].toString() == "Add Teacher"
-                  ? customSizedBox()
-                  : customSizedBox(height: 0),
-              editProfileArgument[0]["pageTitle"].toString() == "Add Teacher"
-                  ? customTextField(
-                      "Confirm Password",
-                      confirmPasswordVisible,
-                      IconButton(
-                        icon: Icon(
-                          //choose the icon on based of passwordVisibility
-                          confirmPasswordVisible
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: Colors.grey,
-                        ),
-                        onPressed: _confirmPasswordVisibility,
-                      ),
-                      _confirmpass,
-                      (value) {
-                        if (value!.isEmpty) {
-                          return "Please Re-Enter Your Password";
-                        }
-                        if (value != _password.text) {
-                          return "Both Password Should Be Matched";
-                        }
-                      },
-                      (value) {
-                        _confirmpass.text = value!;
-                      },
-                      responsiveHW(context, wd: 100),
-                      responsiveHW(context, ht: 100),
-                      InputBorder.none,
-                      pIcon: Icons.lock,
-                    )
-                  : customSizedBox(height: 0),
-              customSizedBox(height: 3),
-              Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: responsiveHW(context, wd: 6)!.toDouble()),
-                  child: Container(
-                    decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(100)),
-                        color: Color(0xff009688)),
-                    height: responsiveHW(context, ht: 6),
-                    child: TextButton(
-                      onPressed: isauthenticating
-                          ? null
-                          : () async {
-                              if (_formKey.currentState!.validate()) {
-                                setState(() {
-                                  isauthenticating = true;
-                                });
-                                editProfileArgument[0]["pageTitle"]
-                                            .toString() ==
-                                        "Add Teacher"
-                                    ? _createuserwithemail(_email.text.trim(),
-                                        _password.text.trim())
-                                    : addTeacherData();
+                      pIcon: FontAwesomeIcons.phone,
+                    ),
+                    customSizedBox(),
+                    editProfileArgument[0]["pageTitle"].toString() ==
+                            "Add Teacher"
+                        ? customTextField(
+                            "Email",
+                            false,
+                            null,
+                            _email,
+                            (value) {
+                              if (value!.isEmpty) {
+                                return "Please Enter Your Email";
+                              }
+                              if (!RegExp(
+                                      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                  .hasMatch(value)) {
+                                return "Please Enter Valid Email Address";
                               }
                             },
-                      child: isauthenticating
-                          ? const CircularProgressIndicator(
-                              color: Colors.white,
-                            )
-                          : Text(
-                              editProfileArgument[0]['buttonText'].toString(),
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: responsiveHW(context, ht: 3)),
+                            (value) {
+                              _email.text = value!;
+                            },
+                            responsiveHW(context, wd: 100),
+                            responsiveHW(context, ht: 100),
+                            InputBorder.none,
+                            pIcon: Icons.email,
+                          )
+                        : customSizedBox(height: 0),
+                    customSizedBox(),
+                    editProfileArgument[0]["pageTitle"].toString() ==
+                            "Add Teacher"
+                        ? customTextField(
+                            "Password",
+                            passwordVisible,
+                            IconButton(
+                              icon: Icon(
+                                //choose the icon on based of passwordVisibility
+                                passwordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Colors.grey,
+                              ),
+                              onPressed: _passwordVisibility,
                             ),
-                    ),
-                  ))
-            ]))
-          ],
-        ),
-      ),
+                            _password,
+                            (value) {
+                              if (value!.isEmpty) {
+                                return "Please enter your password";
+                              }
+                              if (value.length < 8) {
+                                return "Password length must be atleast 8 characters";
+                              }
+                            },
+                            (value) {
+                              _password.text = value!;
+                            },
+                            responsiveHW(context, wd: 100),
+                            responsiveHW(context, ht: 100),
+                            InputBorder.none,
+                            pIcon: Icons.lock,
+                          )
+                        : customSizedBox(height: 0),
+                    editProfileArgument[0]["pageTitle"].toString() ==
+                            "Add Teacher"
+                        ? customSizedBox()
+                        : customSizedBox(height: 0),
+                    editProfileArgument[0]["pageTitle"].toString() ==
+                            "Add Teacher"
+                        ? customTextField(
+                            "Confirm Password",
+                            confirmPasswordVisible,
+                            IconButton(
+                              icon: Icon(
+                                //choose the icon on based of passwordVisibility
+                                confirmPasswordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Colors.grey,
+                              ),
+                              onPressed: _confirmPasswordVisibility,
+                            ),
+                            _confirmpass,
+                            (value) {
+                              if (value!.isEmpty) {
+                                return "Please Re-Enter Your Password";
+                              }
+                              if (value != _password.text) {
+                                return "Both Password Should Be Matched";
+                              }
+                            },
+                            (value) {
+                              _confirmpass.text = value!;
+                            },
+                            responsiveHW(context, wd: 100),
+                            responsiveHW(context, ht: 100),
+                            InputBorder.none,
+                            pIcon: Icons.lock,
+                          )
+                        : customSizedBox(height: 0),
+                    customSizedBox(height: 3),
+                    Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal:
+                                responsiveHW(context, wd: 6)!.toDouble()),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(100)),
+                              color: Color(0xff009688)),
+                          height: responsiveHW(context, ht: 6),
+                          child: TextButton(
+                            onPressed: isauthenticating
+                                ? null
+                                : () async {
+                                    if (_formKey.currentState!.validate()) {
+                                      setState(() {
+                                        isauthenticating = true;
+                                      });
+                                      editProfileArgument[0]["pageTitle"]
+                                                  .toString() ==
+                                              "Add Teacher"
+                                          ? _createuserwithemail(
+                                              _email.text.trim(),
+                                              _password.text.trim())
+                                          : addTeacherData();
+                                    }
+                                  },
+                            child: isauthenticating
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  )
+                                : Text(
+                                    editProfileArgument[0]['buttonText']
+                                        .toString(),
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: responsiveHW(context, ht: 3)),
+                                  ),
+                          ),
+                        ))
+                  ]))
+                ],
+              ),
+            ),
     );
   }
 }
